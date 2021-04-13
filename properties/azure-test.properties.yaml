@@ -1,0 +1,62 @@
+execution:
+- scenario: relative-perf
+  relative-perf:
+    script: ToBeOverWrittenOnCommandLine.jmx
+reporting:
+  - module: passfail
+    criteria:
+    - avg-rt>30s for 120s, stop as failed
+    - avg-ct>100ms for 120s, stop as failed
+    - failures>50% for 30s, stop as failed
+    - rc5??>20% for 120s, stop as failed
+    - class: bzt.modules.monitoring.MonitoringCriteria
+      subject: local/cpu
+      condition: '>'
+      threshold: 90
+      timeframe: 30s
+      fail: false
+      stop: false
+modules:
+  consolidator:
+    ignore-labels:
+    - BS-MultiStoreUserJourneyHelper
+    - BS-MultiStoreThreadSetup
+    - BS-MultiStoreSiteHelper
+  jmeter:
+    plugins:
+    - jpgc-ggl
+    - jpgc-synthesis
+    - jpgc-graphs-basic
+    - jpgc-graphs-vs
+    - jpgc-graphs-additional
+    - jpgc-graphs-dist
+    - jpgc-graphs-composite
+    properties:
+      jmeter.save.saveservice.output_format: csv
+      jmeter.save.saveservice.data_type: false
+      jmeter.save.saveservice.label: true
+      jmeter.save.saveservice.response_code: true
+      jmeter.save.saveservice.response_data.on_error: false
+      jmeter.save.saveservice.response_message: false
+      jmeter.save.saveservice.assertion_results_failure_message: false
+      jmeter.save.saveservice.successful: true
+      jmeter.save.saveservice.thread_name: true
+      jmeter.save.saveservice.time: true
+      jmeter.save.saveservice.subresults: false
+      jmeter.save.saveservice.assertions: true
+      jmeter.save.saveservice.latency: true
+      jmeter.save.saveservice.bytes: true
+      jmeter.save.saveservice.hostname: true
+      jmeter.save.saveservice.thread_counts: true
+      jmeter.save.saveservice.sample_count: true
+      jmeter.save.saveservice.timestamp_format: "HH:mm:ss"
+      jmeter.save.saveservice.default_delimiter: ";"
+      jmeter.save.saveservice.print_field_names: true
+      jmeter.save.saveservice.autoflush: true
+      runs: 3
+      rampUp: 1
+      UJ-Homepage.Threads: 1
+      UJ-ListProducts.Threads: 1
+      UJ-GetProductById.Threads: 1
+      UJ-UpdateProduct.Threads: 1
+      UJ-AddNewProduct.Threads: 1
