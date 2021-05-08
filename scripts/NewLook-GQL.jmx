@@ -84,6 +84,28 @@
         <boolProp name="CookieManager.clearEachIteration">true</boolProp>
       </CookieManager>
       <hashTree/>
+      <TestFragmentController guiclass="TestFragmentControllerGui" testclass="TestFragmentController" testname="Test Fragment" enabled="false"/>
+      <hashTree>
+        <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="JF-MultiStoreThreadSetup" enabled="true"/>
+        <hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="GY-MultiStoreThreadSetup" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">props.get(&quot;UserJourneyHelper&quot;).setThreadStore(ctx);
+props.get(&quot;SiteHelper&quot;).setStoreVariables(ctx);
+props.get(&quot;SiteHelper&quot;).setPacing(ctx);
+
+//System.out.println(&quot;Pacing: &quot; + vars.get(&quot;pacing&quot;));
+//System.out.println(&quot;Store: &quot; + vars.get(&quot;store&quot;));
+//System.out.println(&quot;Hostname: &quot; + vars.get(&quot;hostname&quot;));
+//System.out.println(&quot;StoreId: &quot; + vars.get(&quot;storeId&quot;));
+//System.out.println(bsh.shared.SiteHelper.getDataBeanRandomSearch(ctx, &quot;users&quot;));</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
       <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="Initialisation" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
@@ -111,145 +133,133 @@ import org.slf4j.LoggerFactory;
 
 public class SiteHelper {
 
-	private Set stores;
-	private Map storesProps;
-	private Map userJourneyThreads;
-	private Map userJourneyThroughput;
-	private String storeRegex = &quot;store\\.\\d+&quot;;
-	final props=JMeterUtils.getJMeterProperties();
-	final log=LoggerFactory.getLogger(getClass().getName());
-	private boolean charsetChecked=false;
-	public SiteHelper() {
+    private Set stores;
+	private Map dataFiles;
+    private Map storesProps;
+    private Map userJourneyThreads;
+    private String storeRegex = &quot;store\\.\\d+&quot;;
+    final props=JMeterUtils.getJMeterProperties();
+    final log=LoggerFactory.getLogger(getClass().getName());
+    private boolean charsetChecked=true;
+    public SiteHelper() {
 
-		stores = new HashSet();
-		storesProps = new HashMap();
-		userJourneyThreads = new HashMap();
-		userJourneyThroughput = new HashMap();
-		
-		// Get all stores from property file
-		Pattern p = Pattern.compile(storeRegex);
-		for (String propName: props.propertyNames()) {
-			Matcher m = p.matcher(propName);
-			if (m.find()) {
-				String store = props.get(propName);
-				stores.add(store);
-				storesProps.put(store, new HashMap());
-			}
-		}
-		
-		// Get store dataDirPath first - need before creating salmon databean
-		for (String store: stores) {
-			String dataDirPath = props.getProperty(store + &quot;.dataDirPath&quot;);
-			
-			//Default to &apos;data/&apos; if not found
-			//log.info(&quot;No dataDirPath found for store &quot; + store + &quot;. Defaulting to &apos;data/&apos;&quot;);
-			dataDirPath = (dataDirPath == null) ? &quot;data/&quot; : dataDirPath;
-			storesProps.get(store).put(&quot;dataDirPath&quot;, dataDirPath);
-		}
-		
-		
-		// Get store related properties from properties file
-		for (String propName: props.propertyNames()) {
-			for (String store: stores) {
-				String storeDataDir = storesProps.get(store).get(&quot;dataDirPath&quot;);
-				
-				if (propName.startsWith(store + &quot;.&quot;)) {
-					// Found store property
-					String propValue = props.get(propName);
-					propName = propName.replaceFirst(&quot;^&quot; + store + &quot;.&quot;, &quot;&quot;); //strip store prefix
-					
-					if (propName.startsWith(&quot;dataFile.&quot;)) {
-						// Found datafile
-						propName = propName.replaceFirst(&quot;^dataFile.&quot;, &quot;&quot;);
-						dataFiles.get(store).put(propName,storeDataDir + &quot;/&quot; + propValue);
-						if(! charsetChecked){
-						    CharsetToolkit ctk = new CharsetToolkit(new File(storeDataDir + &quot;/&quot; + propValue));
-						    props.put(&quot;guessedCharset&quot;, ctk.getDefaultCharset());
-						    charsetChecked=true;
-						}
-						
-					} else if (propName.startsWith(&quot;UJ-&quot;) &amp;&amp; propName.endsWith(&quot;.Threads&quot;) ) {
-						// Found User Journey Threads
-						String userJourney = propName.replaceFirst(/.Threads$/, &quot;&quot;);
-						if (!userJourneyThreads.containsKey(userJourney)) {
-							userJourneyThreads.put(userJourney, new HashMap());
-						}
-						userJourneyThreads.get(userJourney).put(store, propValue);
-						
-					} else if(propName.startsWith(&quot;UJ-&quot;) &amp;&amp; propName.endsWith(&quot;.Throughput&quot;) ){
-						// Found User Journey Throughput
-						String userJourney = propName.replaceFirst(/.Throughput$/, &quot;&quot;);
-						if (!userJourneyThroughput.containsKey(userJourney)) {
-							userJourneyThroughput.put(userJourney, new HashMap());
-						}
-						userJourneyThroughput.get(userJourney).put(store, propValue);
-					
-					}else {
-						//Neither data file or user journey thread property
-						storesProps.get(store).put(propName, propValue);
-					}
-				}
-			}
-		}
-	}
+        stores = new HashSet();
+        dataFiles = new HashMap();
+        storesProps = new HashMap();
+        userJourneyThreads = new HashMap();
+        
+        // Get all stores from property file
+        Pattern p = Pattern.compile(storeRegex);
+        for (String propName: props.propertyNames()) {
+            Matcher m = p.matcher(propName);
+            if (m.find()) {
+                String store = props.get(propName);
+                stores.add(store);
+				dataFiles.put(store, new HashMap())
+                storesProps.put(store, new HashMap());
+            }
+        }
+        
+        // Get store dataDirPath first - need before creating salmon databean
+        for (String store: stores) {
+            String dataDirPath = props.getProperty(store + &quot;.dataDirPath&quot;);
+            
+            //Default to &apos;data/&apos; if not found
+            //log.info(&quot;No dataDirPath found for store &quot; + store + &quot;. Defaulting to &apos;data/&apos;&quot;);
+            dataDirPath = (dataDirPath == null) ? &quot;data/&quot; : dataDirPath;
+            storesProps.get(store).put(&quot;dataDirPath&quot;, dataDirPath);
+        }
+        
+        
+        // Get store related properties from properties file
+        for (String propName: props.propertyNames()) {
+            for (String store: stores) {
+                String storeDataDir = storesProps.get(store).get(&quot;dataDirPath&quot;);
+                
+                if (propName.startsWith(store + &quot;.&quot;)) {
+                    // Found store property
+                    String propValue = props.get(propName);
+                    propName = propName.replaceFirst(&quot;^&quot; + store + &quot;.&quot;, &quot;&quot;); //strip store prefix
+                    
+                    if (propName.startsWith(&quot;dataFile.&quot;)) {
+                        // Found datafile
+                        propName = propName.replaceFirst(&quot;^dataFile.&quot;, &quot;&quot;);
+                        dataFiles.get(store).put(propName,storeDataDir + &quot;/&quot; + propValue);
+                        if(! charsetChecked){
+                            CharsetToolkit ctk = new CharsetToolkit(new File(storeDataDir + &quot;/&quot; + propValue));
+                            props.put(&quot;guessedCharset&quot;, ctk.getDefaultCharset());
+                            charsetChecked=true;
+                        }
+                        
+                    } else if (propName.startsWith(&quot;UJ-&quot;) &amp;&amp; propName.endsWith(&quot;.Threads&quot;) ) {
+                        // Found User Journey Threads
+                        String userJourney = propName.replaceFirst(/.Threads$/, &quot;&quot;);
+                        if (!userJourneyThreads.containsKey(userJourney)) {
+                            userJourneyThreads.put(userJourney, new HashMap());
+                        }
+                        userJourneyThreads.get(userJourney).put(store, propValue);
+                        
+                    }else {
+                        //Neither data file or user journey thread property
+                        storesProps.get(store).put(propName, propValue);
+                    }
+                }
+            }
+        }
+    }
 
-	public void setStoreVariables(JMeterContext threadContext) {
-		setStoreVariables(threadContext, threadContext.getVariables().get(&quot;store&quot;));
-	}
+    public void setStoreVariables(JMeterContext threadContext) {
+        setStoreVariables(threadContext, threadContext.getVariables().get(&quot;store&quot;));
+    }
 
-	public void setStoreVariables(JMeterContext threadContext, String store) {
-		/*
-		 * Adds all properties in &apos;storesProps&apos; for the specified store 
-		 * to the JMeterVariables of the passed in thread context.
-		 */
-		if (!storesProps.containsKey(store)) {
-			log.error(&quot;Store doesn&apos;t exist.  Unable to set store properties&quot;);
-			throw new Exception(); //Ensures error falls through to calling beanshell.
-			return;
-		}
-		Map propsMap = (Map) storesProps.get(store);		
-		JMeterVariables threadVariables = threadContext.getVariables();
-		for (String propName: propsMap.keySet()) {
-			threadVariables.put(propName, propsMap.get(propName));
-		}
-		threadVariables.put(&quot;store&quot;, store);
-	}
+    public void setStoreVariables(JMeterContext threadContext, String store) {
+        /*
+         * Adds all properties in &apos;storesProps&apos; for the specified store 
+         * to the JMeterVariables of the passed in thread context.
+         */
+        if (!storesProps.containsKey(store)) {
+            log.error(&quot;Store doesn&apos;t exist.  Unable to set store properties&quot;);
+            throw new Exception(); //Ensures error falls through to calling beanshell.
+            return;
+        }
+        Map propsMap = (Map) storesProps.get(store);        
+        JMeterVariables threadVariables = threadContext.getVariables();
+        for (String propName: propsMap.keySet()) {
+            threadVariables.put(propName, propsMap.get(propName));
+        }
+        threadVariables.put(&quot;store&quot;, store);
+    }
 
-	public void setPacing(JMeterContext threadContext) {
-		setPacing(threadContext, threadContext.getVariables().get(&quot;store&quot;));
-	}
-	
-	public void setPacing (JMeterContext threadContext, String store) {
-		String threadName = threadContext.getThreadGroup().getName();
-		JMeterVariables threadVariables = threadContext.getVariables();
-		String pacing = threadVariables.get(threadName + &quot;.Pacing&quot;);
+    public void setPacing(JMeterContext threadContext) {
+        setPacing(threadContext, threadContext.getVariables().get(&quot;store&quot;));
+    }
+    
+    public void setPacing (JMeterContext threadContext, String store) {
+        String threadName = threadContext.getThreadGroup().getName();
+        JMeterVariables threadVariables = threadContext.getVariables();
+        String pacing = threadVariables.get(threadName + &quot;.Pacing&quot;);
 
-		// Default to 10000 ms
-		//log.info(&quot;No pacing for store &quot; + store + &quot; user journey &quot; + threadName + &quot;. Defaulting to 10000&quot;);
-		pacing = (pacing == null) ? &quot;10000&quot; : pacing;		
-		threadVariables.put(&quot;pacing&quot;, pacing);
-	}
+        // Default to 10000 ms
+        //log.info(&quot;No pacing for store &quot; + store + &quot; user journey &quot; + threadName + &quot;. Defaulting to 10000&quot;);
+        pacing = (pacing == null) ? &quot;10000&quot; : pacing;        
+        threadVariables.put(&quot;pacing&quot;, pacing);
+    }
 
-	public String getStoreProperty(String store, String propName) {
-		String storeProp = null;
-		if (storesProps.containsKey(store)) {
-			storeProp = storesProps.get(store).get(propName);
-		}
-		return storeProp;
-	}
+    public String getStoreProperty(String store, String propName) {
+        String storeProp = null;
+        if (storesProps.containsKey(store)) {
+            storeProp = storesProps.get(store).get(propName);
+        }
+        return storeProp;
+    }
 
-	public Map getUserJourneyThreadsMap() {
-		return userJourneyThreads;
-	}
-
-	public Map getUserJourneyThroughputMap(){
-	    return userJourneyThroughput;
-	}
-
-	public String getDataFilePath(JMeterContext threadContext, String dataFileName){
-		String filePath=dataFiles.get(threadContext.getVariables().get(&quot;store&quot;)).get(dataFileName);
-	     return filePath;
-	}
+    public Map getUserJourneyThreadsMap() {
+        return userJourneyThreads;
+    }
+    public String getDataFilePath(JMeterContext threadContext, String dataFileName){
+        String filePath=dataFiles.get(threadContext.getVariables().get(&quot;store&quot;)).get(dataFileName);
+         return filePath;
+    }
 }
 
 props.put(&quot;SiteHelper&quot;, new SiteHelper());
@@ -268,7 +278,6 @@ import org.slf4j.LoggerFactory;
 public class UserJourneyHelper {
 
 	private Map userJourneys;
-	private Map userJourneysThroughput;
 	private Map userJourneysThreadStartOrder;
 	final props=JMeterUtils.getJMeterProperties();
 	final log=LoggerFactory.getLogger(getClass().getName());
@@ -276,7 +285,6 @@ public class UserJourneyHelper {
 	public UserJourneyHelper() {
 		
 		userJourneys = (props.get(&quot;SiteHelper&quot;)).getUserJourneyThreadsMap();
-		userJourneysThroughput = (props.get(&quot;SiteHelper&quot;)).getUserJourneyThroughputMap();
 		userJourneysThreadStartOrder = new HashMap();
 
 		//For each user journey need to determine total number of threads
@@ -347,6 +355,15 @@ props.put(&quot;UserJourneyHelper&quot;, new UserJourneyHelper());</stringProp>
         <stringProp name="ThreadGroup.delay"></stringProp>
       </ThreadGroup>
       <hashTree>
+        <ModuleController guiclass="ModuleControllerGui" testclass="ModuleController" testname="MC-MultiStoreThreadSetup" enabled="true">
+          <collectionProp name="ModuleController.node_path">
+            <stringProp name="764597751">Test Plan</stringProp>
+            <stringProp name="881327636">NewLook-GQL</stringProp>
+            <stringProp name="170071582">Test Fragment</stringProp>
+            <stringProp name="944329818">JF-MultiStoreThreadSetup</stringProp>
+          </collectionProp>
+        </ModuleController>
+        <hashTree/>
         <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="TX-GQL-GetComponentById" enabled="true">
           <boolProp name="TransactionController.includeTimers">false</boolProp>
           <boolProp name="TransactionController.parent">false</boolProp>
@@ -393,6 +410,15 @@ props.put(&quot;UserJourneyHelper&quot;, new UserJourneyHelper());</stringProp>
         <stringProp name="ThreadGroup.delay"></stringProp>
       </ThreadGroup>
       <hashTree>
+        <ModuleController guiclass="ModuleControllerGui" testclass="ModuleController" testname="MC-MultiStoreThreadSetup" enabled="true">
+          <collectionProp name="ModuleController.node_path">
+            <stringProp name="764597751">Test Plan</stringProp>
+            <stringProp name="881327636">NewLook-GQL</stringProp>
+            <stringProp name="170071582">Test Fragment</stringProp>
+            <stringProp name="944329818">JF-MultiStoreThreadSetup</stringProp>
+          </collectionProp>
+        </ModuleController>
+        <hashTree/>
         <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="TX-GQL-GetProductById" enabled="true">
           <boolProp name="TransactionController.includeTimers">false</boolProp>
           <boolProp name="TransactionController.parent">false</boolProp>
@@ -439,6 +465,15 @@ props.put(&quot;UserJourneyHelper&quot;, new UserJourneyHelper());</stringProp>
         <stringProp name="ThreadGroup.delay"></stringProp>
       </ThreadGroup>
       <hashTree>
+        <ModuleController guiclass="ModuleControllerGui" testclass="ModuleController" testname="MC-MultiStoreThreadSetup" enabled="true">
+          <collectionProp name="ModuleController.node_path">
+            <stringProp name="764597751">Test Plan</stringProp>
+            <stringProp name="881327636">NewLook-GQL</stringProp>
+            <stringProp name="170071582">Test Fragment</stringProp>
+            <stringProp name="944329818">JF-MultiStoreThreadSetup</stringProp>
+          </collectionProp>
+        </ModuleController>
+        <hashTree/>
         <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="TX-GQL-CMSPages" enabled="true">
           <boolProp name="TransactionController.includeTimers">false</boolProp>
           <boolProp name="TransactionController.parent">false</boolProp>
@@ -485,6 +520,15 @@ props.put(&quot;UserJourneyHelper&quot;, new UserJourneyHelper());</stringProp>
         <stringProp name="ThreadGroup.delay"></stringProp>
       </ThreadGroup>
       <hashTree>
+        <ModuleController guiclass="ModuleControllerGui" testclass="ModuleController" testname="MC-MultiStoreThreadSetup" enabled="true">
+          <collectionProp name="ModuleController.node_path">
+            <stringProp name="764597751">Test Plan</stringProp>
+            <stringProp name="881327636">NewLook-GQL</stringProp>
+            <stringProp name="170071582">Test Fragment</stringProp>
+            <stringProp name="944329818">JF-MultiStoreThreadSetup</stringProp>
+          </collectionProp>
+        </ModuleController>
+        <hashTree/>
         <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="TX-GQL-GetCMSPageByID" enabled="true">
           <boolProp name="TransactionController.includeTimers">false</boolProp>
           <boolProp name="TransactionController.parent">false</boolProp>
