@@ -10,7 +10,7 @@
         <collectionProp name="Arguments.arguments">
           <elementProp name="REPORT_DIR_PATH" elementType="Argument">
             <stringProp name="Argument.name">REPORT_DIR_PATH</stringProp>
-            <stringProp name="Argument.value">${__P(dataDirPath,)}</stringProp>
+            <stringProp name="Argument.value">${__P(reportDirPath,)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="RAMPUPTIME" elementType="Argument">
@@ -34,7 +34,7 @@
         </elementProp>
         <stringProp name="HTTPSampler.domain">${hostname}</stringProp>
         <stringProp name="HTTPSampler.port">${port}</stringProp>
-        <stringProp name="HTTPSampler.protocol"></stringProp>
+        <stringProp name="HTTPSampler.protocol">https</stringProp>
         <stringProp name="HTTPSampler.contentEncoding"></stringProp>
         <stringProp name="HTTPSampler.path"></stringProp>
         <stringProp name="HTTPSampler.concurrentPool">6</stringProp>
