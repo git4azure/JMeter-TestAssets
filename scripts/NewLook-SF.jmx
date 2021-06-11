@@ -55,7 +55,7 @@
           </elementProp>
           <elementProp name="GRAPHQL_HOSTNAME" elementType="Argument">
             <stringProp name="Argument.name">GRAPHQL_HOSTNAME</stringProp>
-            <stringProp name="Argument.value">${__P(graphql_host,apollo-graphql-fe-cicd-dsf-uks-as.azurewebsites.net)}</stringProp>
+            <stringProp name="Argument.value">${__P(graphql_hostname,apollo-graphql-fe-cicd-dsf-uks-as.azurewebsites.net)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="GRAPHQL_PORT" elementType="Argument">
