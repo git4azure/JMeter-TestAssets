@@ -4,7 +4,7 @@ ARGIND==1{
 	    ss="true";
 	    t1=substr($2,3,index($2,",")-4);
 	}; 
-	if(index($0,"meanResTime") && ss=="true"){
+	if(index($0,"pct2ResTime") && ss=="true"){
 	    trans1[t1]=substr($2,1,index($2,",")-1);
 		ss="false"
 	}
@@ -14,7 +14,7 @@ ARGIND==2{
 	    ss2="true";
 	    t2=substr($2,3,index($2,",")-4);
 	}; 
-	if(index($0,"meanResTime") && ss2=="true"){
+	if(index($0,"pct2ResTime") && ss2=="true"){
 	    trans2[t2]=substr($2,1,index($2,",")-1);
 		ss2="false";
 	}
