@@ -57,7 +57,7 @@ jobs:
         uses: actions/checkout@v2
         with: 
           repository: git4azure/JMeter-TestAssets
-          path: JMeter-TestAssets
+          #path: JMeter-TestAssets
       - name: run JMeter test
         run: |
           echo "******** Current directory ********"
