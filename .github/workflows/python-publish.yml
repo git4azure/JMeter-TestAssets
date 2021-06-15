@@ -43,7 +43,11 @@ jobs:
       - name: get specific run_number
         run: |
           runNum=${{github.run_number}}
-          crunNum=`expr $runNum - 1`
+          if [ runNum == 1 ]; then 
+             crunNum = 1
+          else
+             crunNum=`expr $runNum - 1`
+          fi
           echo "cRunNum=${crunNum}" >> $GITHUB_ENV
       - uses: actions/setup-java@v2
         with:
