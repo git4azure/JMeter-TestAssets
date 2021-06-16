@@ -80,7 +80,7 @@ jobs:
 
       - name: check workspace
         run: |
-           headline="+++++++++++++++++++ test github env +++++++++++++\n"
+           headline="+++++++++++++++++++ test github env +++++++++++++\r"
            result=`awk '{print "test\t10\ntest2\t20"}' properties/NewLook_SFP.properties`
            #echo "result"+$result
            C_RES=${headline}+${result}
@@ -91,7 +91,7 @@ jobs:
            echo "${C_RES}" >> $GITHUB_ENV
            echo "EOF" >> $GITHUB_ENV
            echo "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
-           echo "env.C_RES"+${{env.C_RES}}
+           #echo "env.C_RES"+${{env.C_RES}}
       - name: display C_RES
         run: |
           echo "String in env:: ${{env.C_RES}}"
