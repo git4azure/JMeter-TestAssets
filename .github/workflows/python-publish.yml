@@ -57,10 +57,10 @@ jobs:
       #  with:
       #    distribution: 'adopt'
       #    java-version: '11'
-      #- name: Checkout JMeter-TestAssets
-      #  uses: actions/checkout@v2
-      #  with: 
-      #    repository: git4azure/JMeter-TestAssets
+      - name: Checkout JMeter-TestAssets
+        uses: actions/checkout@v2
+        with: 
+          repository: git4azure/JMeter-TestAssets
           #path: JMeter-TestAssets
       - name: run JMeter test
         run: |
