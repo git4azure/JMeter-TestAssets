@@ -94,6 +94,10 @@ jobs:
            pwd
            ls
            ls -ltr *
+           headline="+++++++++++++++++++ test github env +++++++++++++\n"
+           result=`awk '{print "test\t10\ntest2\20"}`
+           echo "compRes=${headline}+${result}" >> $GITHUB_ENV
+           echo "env.compRes"+${{env.compRes}}
      # - name: Download workflow artifact
      #   continue-on-error: true
      #   id: download
@@ -161,3 +165,5 @@ jobs:
       #  env:
       #    MATRIX_CONTEXT: ${{ toJSON(matrix) }}
       #  run: echo "$MATRIX_CONTEXT"
+
+    
