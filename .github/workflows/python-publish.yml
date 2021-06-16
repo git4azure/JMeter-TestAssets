@@ -5,8 +5,8 @@ name: 'github workflow/actions demo'
 # Controls when the action will run. 
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
-  push:
-    branches: [ master ]
+  #push:
+  #  branches: [ master ]
   #pull_request:
   #  branches: [ master ]
 
@@ -91,7 +91,7 @@ jobs:
            echo "+++++++++++++++++++ test github env +++++++++++++" >> $GITHUB_ENV
            echo "${result}" >> $GITHUB_ENV
            echo "EOF" >> $GITHUB_ENV
-           echo "&&&&&&&&&&&&&&&&**&&&&&&&&&&&&&&"
+           echo "&&&&&&&^^^&&&&&&&&&**&&&&&&&&&&&&&&"
            #echo "env.C_RES"+${{env.C_RES}}
       - name: display C_RES
         run: |
