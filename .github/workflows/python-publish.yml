@@ -95,7 +95,7 @@ jobs:
            ls
            ls -ltr *
            headline="+++++++++++++++++++ test github env +++++++++++++\n"
-           result=`awk '{print "test\t10\ntest2\20"}`
+           result=`awk '{print "test\t10\ntest2\20"}'`
            cRes=${headline}+${result}
            echo "***********************************"
            echo $cRes
