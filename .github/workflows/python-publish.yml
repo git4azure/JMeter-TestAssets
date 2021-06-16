@@ -101,7 +101,9 @@ jobs:
            echo "***********************************"
            echo $cRes
            echo "***********************************"
-           echo "compRes=${cRes}" >> $GITHUB_ENV
+           echo "compRes<<EOF" >> $GITHUB_ENV
+           echo "${cRes}" >> $GITHUB_ENV
+           echo "EOF" >> $GITHUB_ENV
            echo "env.compRes"+${{env.compRes}}
      # - name: Download workflow artifact
      #   continue-on-error: true
