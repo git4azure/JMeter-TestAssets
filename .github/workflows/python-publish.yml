@@ -53,14 +53,14 @@ jobs:
              crunNum=`expr $runNum - 1`
           fi
           echo "cRunNum=${crunNum}" >> $GITHUB_ENV
-      - uses: actions/setup-java@v2
-        with:
-          distribution: 'adopt'
-          java-version: '11'
-      - name: Checkout JMeter-TestAssets
-        uses: actions/checkout@v2
-        with: 
-          repository: git4azure/JMeter-TestAssets
+      #- uses: actions/setup-java@v2
+      #  with:
+      #    distribution: 'adopt'
+      #    java-version: '11'
+      #- name: Checkout JMeter-TestAssets
+      #  uses: actions/checkout@v2
+      #  with: 
+      #    repository: git4azure/JMeter-TestAssets
           #path: JMeter-TestAssets
       - name: run JMeter test
         run: |
@@ -95,7 +95,7 @@ jobs:
            ls
            ls -ltr *
            headline="+++++++++++++++++++ test github env +++++++++++++\n"
-           result=`awk '{print "test\t10\ntest2\t20"}'`
+           result=`awk '{print "test\t10\ntest2\t20"}' properties/NewLook_SFP.properties`
            echo "result"+$result
            cRes=${headline}+${result}
            echo "***********************************"
