@@ -49,6 +49,7 @@ jobs:
              crunNum=`expr $runNum - 1`
           fi
           echo "cRunNum=${crunNum}" >> $GITHUB_ENV
+          echo ${{github.job}}
       #- uses: actions/setup-java@v2
       #  with:
       #    distribution: 'adopt'
