@@ -50,6 +50,8 @@ jobs:
           fi
           echo "cRunNum=${crunNum}" >> $GITHUB_ENV
           echo ${{github.job}}
+          echo "======"
+          echo "${{matrix.node}}
       #- uses: actions/setup-java@v2
       #  with:
       #    distribution: 'adopt'
